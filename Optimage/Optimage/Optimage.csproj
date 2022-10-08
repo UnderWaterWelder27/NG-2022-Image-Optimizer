@@ -4,4 +4,18 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="package.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\" />
+    <Folder Include="wwwroot\images\" />
+    <Folder Include="wwwroot\css\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\images\Optimage-logo.png" />
+  </ItemGroup>
+
 </Project>

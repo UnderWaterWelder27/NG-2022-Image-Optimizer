@@ -50,7 +50,7 @@ namespace Optimage
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=Optimage}/{action=Index}/{id?}");
             });
         }
     }
