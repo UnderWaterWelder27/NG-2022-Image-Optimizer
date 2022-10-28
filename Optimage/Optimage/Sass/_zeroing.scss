@@ -1,29 +1,46 @@
-﻿* {
-    padding: 0;
-    margin: 0;
-    border: 0;
+﻿// zeroing indents
+* {
+    padding: 0; // inside indent
+    border: 0; // border
+    margin: 0; // outside indent
 }
 
+// Calculating width/height include only element, border, margin (no padding)
+*, *:before, *:after {
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+// change line elements to block
+nav, footer, header, aside, div {
+    display: block;
+}
+
+// optimize text for device window size
 html, body {
     height: 100%;
     width: 100%;
     font-size: 100%;
     font-size: 14px;
+    line-height: 1px;
+    -ms-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
 }
 
-nav, footer, header, aside {
-    display: block;
-}
-
+// disable decoration for links
 a, a:hover, a:visited, a:active, a:focus {
     text-decoration: none;
     outline: none;
 }
 
+// disable style for lists
 ul, li {
     list-style: none;
 }
 
+// default headers
 h1, h2, h3, h4, h5, h6 {
     font-size: inherit;
     font-weight: 400;
