@@ -6,7 +6,7 @@ namespace Optimage.Controllers
     {
         public IActionResult Index()
         {
-            return View("OptimageView");
+            return View("Optimage");
         }
     }
 }
