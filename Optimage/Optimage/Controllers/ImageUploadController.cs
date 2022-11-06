@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Hosting.Server;
+using Optimage.Models;
 
 
 namespace Optimage.Controllers
@@ -17,7 +18,7 @@ namespace Optimage.Controllers
             Environment = _environment;
         }
 
-        /* --- Startup action --- */
+        // --- Startup action --- //
         /**
             Contains the procedures need to be activated when the project is launched:
             - Auto clearing image directory from files and folders
@@ -26,26 +27,11 @@ namespace Optimage.Controllers
         public IActionResult ImageUpload()
         {
             DirectoryInfo folder = new DirectoryInfo(Path.Combine(this.Environment.ContentRootPath, "Images"));
-            foreach (FileInfo file in folder.EnumerateFiles())
-            {
-                if (file.Exists)
-                {
-                    file.Delete();
-                }
-            }
-            foreach (DirectoryInfo directory in folder.EnumerateDirectories())
-            {
-                if (directory.Exists)
-                {
-                    directory.Delete();
-                }
-            }
-            var items = GetFiles();
-            return View(items);
+            AutoClearDirectory(folder);
+            return View(GetFiles());
         }
-
  
-        /* --- Uploading action --- */
+        // --- Uploading action --- //
         /**
             Saves image upload directory. If missing, create a folder.
             With using file stream creates file in choosen directory.
@@ -56,46 +42,70 @@ namespace Optimage.Controllers
         public IActionResult ImageUpload(IFormFile uploadedImage)
         {
             string appPath = Path.Combine(this.Environment.ContentRootPath, "Images");
-            if (!Directory.Exists(appPath))
+            if (Directory.Exists(appPath) == false)
             {
                 Directory.CreateDirectory(appPath);
             }
-            try
+
+            string fileName = Path.GetFileName(uploadedImage.FileName);
+            using (FileStream stream = new FileStream(Path.Combine(appPath, fileName), FileMode.Create))
             {
-                string fileName = Path.GetFileName(uploadedImage.FileName);
-                using (FileStream stream = new FileStream(Path.Combine(appPath, fileName), FileMode.Create))
-                {
-                    uploadedImage.CopyTo(stream);
-                    ViewBag.Message = string.Format($"<b>{fileName}</b> uploaded.<br />");
-                }
+                uploadedImage.CopyTo(stream);
+                ViewBag.Message = string.Format($"<b>{fileName}</b> uploaded.<br />");
             }
-            catch (System.NullReferenceException ex)
-            {
-                ViewBag.Message = "ERROR: " + ex.Message.ToString();
-            }
-            var items = GetFiles();
-            return View(items);
+
+            return View(GetFiles());
         }
 
-        /* --- List of files --- */
+        // --- Auto deleting --- //
+        /**
+            Create Images folder if it doesn't exist, or check all files and folder
+            in directory and delete it.
+        **/
+        private void AutoClearDirectory(DirectoryInfo folder)
+        {
+            if (folder.Exists == false)
+            {
+                Directory.CreateDirectory(Path.Combine(this.Environment.ContentRootPath, "Images"));
+            }
+            else
+            {
+                foreach (FileInfo file in folder.EnumerateFiles())
+                {
+                    if (file.Exists)
+                    {
+                        file.Delete();
+                    }
+                }
+                foreach (DirectoryInfo directory in folder.EnumerateDirectories())
+                {
+                    if (directory.Exists)
+                    {
+                        directory.Delete();
+                    }
+                }
+            }
+        }
+
+        // --- List of files --- //
         /** 
             Summary function which looking for files in choosen directory and return the string List. 
             Used to display file names on the page. 
         **/
-        private List<string> GetFiles()
+        private ImagesModel GetFiles()
         {
             DirectoryInfo folder = new DirectoryInfo(Path.Combine(this.Environment.ContentRootPath, "Images"));
             FileInfo[] fileNames = folder.GetFiles("*.*");
-            List<string> images = new List<string>();
-
+            ImagesModel images = new ImagesModel() { Names = new List<string>() };
+            
             foreach (var file in fileNames)
             {
-                images.Add(file.Name);
+                images.Names.Add(file.Name);
             }
             return images;
         }
 
-        /* --- Download files --- */
+        // --- Download files --- //
         /** 
             Result is generated for every uploaded file as an action link.
             Return action for file download.
