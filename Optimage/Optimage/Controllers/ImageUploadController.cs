@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Hosting.Server;
+using Optimage.Models;
 
 
 namespace Optimage.Controllers
@@ -26,24 +27,9 @@ namespace Optimage.Controllers
         public IActionResult ImageUpload()
         {
             DirectoryInfo folder = new DirectoryInfo(Path.Combine(this.Environment.ContentRootPath, "Images"));
-            foreach (FileInfo file in folder.EnumerateFiles())
-            {
-                if (file.Exists)
-                {
-                    file.Delete();
-                }
-            }
-            foreach (DirectoryInfo directory in folder.EnumerateDirectories())
-            {
-                if (directory.Exists)
-                {
-                    directory.Delete();
-                }
-            }
-            var items = GetFiles();
-            return View(items);
+            AutoClearDirectory(folder);
+            return View(GetFiles());
         }
-
  
         /* --- Uploading action --- */
         /**
@@ -56,7 +42,7 @@ namespace Optimage.Controllers
         public IActionResult ImageUpload(IFormFile uploadedImage)
         {
             string appPath = Path.Combine(this.Environment.ContentRootPath, "Images");
-            if (!Directory.Exists(appPath))
+            if (Directory.Exists(appPath) == false)
             {
                 Directory.CreateDirectory(appPath);
             }
@@ -73,8 +59,38 @@ namespace Optimage.Controllers
             {
                 ViewBag.Message = "ERROR: " + ex.Message.ToString();
             }
-            var items = GetFiles();
-            return View(items);
+
+            return View(GetFiles());
+        }
+
+        /* --- Auto deleting --- */
+        /**
+            Create Images folder if it doesn't exist, or check all files and folder
+            in directory and delete it.
+        **/
+        private void AutoClearDirectory(DirectoryInfo folder)
+        {
+            if (folder.Exists == false)
+            {
+                Directory.CreateDirectory(Path.Combine(this.Environment.ContentRootPath, "Images"));
+            }
+            else
+            {
+                foreach (FileInfo file in folder.EnumerateFiles())
+                {
+                    if (file.Exists)
+                    {
+                        file.Delete();
+                    }
+                }
+                foreach (DirectoryInfo directory in folder.EnumerateDirectories())
+                {
+                    if (directory.Exists)
+                    {
+                        directory.Delete();
+                    }
+                }
+            }
         }
 
         /* --- List of files --- */
@@ -82,16 +98,18 @@ namespace Optimage.Controllers
             Summary function which looking for files in choosen directory and return the string List. 
             Used to display file names on the page. 
         **/
-        private List<string> GetFiles()
+        private ImagesModel GetFiles()
         {
             DirectoryInfo folder = new DirectoryInfo(Path.Combine(this.Environment.ContentRootPath, "Images"));
             FileInfo[] fileNames = folder.GetFiles("*.*");
-            List<string> images = new List<string>();
+            List<string> imageNames = new List<string>();
 
             foreach (var file in fileNames)
             {
-                images.Add(file.Name);
+                imageNames.Add(file.Name);
             }
+
+            ImagesModel images = new ImagesModel() { Names = imageNames };
             return images;
         }
 
