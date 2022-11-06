@@ -18,7 +18,7 @@ namespace Optimage.Controllers
             Environment = _environment;
         }
 
-        /* --- Startup action --- */
+        // --- Startup action --- //
         /**
             Contains the procedures need to be activated when the project is launched:
             - Auto clearing image directory from files and folders
@@ -31,7 +31,7 @@ namespace Optimage.Controllers
             return View(GetFiles());
         }
  
-        /* --- Uploading action --- */
+        // --- Uploading action --- //
         /**
             Saves image upload directory. If missing, create a folder.
             With using file stream creates file in choosen directory.
@@ -46,24 +46,18 @@ namespace Optimage.Controllers
             {
                 Directory.CreateDirectory(appPath);
             }
-            try
+
+            string fileName = Path.GetFileName(uploadedImage.FileName);
+            using (FileStream stream = new FileStream(Path.Combine(appPath, fileName), FileMode.Create))
             {
-                string fileName = Path.GetFileName(uploadedImage.FileName);
-                using (FileStream stream = new FileStream(Path.Combine(appPath, fileName), FileMode.Create))
-                {
-                    uploadedImage.CopyTo(stream);
-                    ViewBag.Message = string.Format($"<b>{fileName}</b> uploaded.<br />");
-                }
-            }
-            catch (System.NullReferenceException ex)
-            {
-                ViewBag.Message = "ERROR: " + ex.Message.ToString();
+                uploadedImage.CopyTo(stream);
+                ViewBag.Message = string.Format($"<b>{fileName}</b> uploaded.<br />");
             }
 
             return View(GetFiles());
         }
 
-        /* --- Auto deleting --- */
+        // --- Auto deleting --- //
         /**
             Create Images folder if it doesn't exist, or check all files and folder
             in directory and delete it.
@@ -93,7 +87,7 @@ namespace Optimage.Controllers
             }
         }
 
-        /* --- List of files --- */
+        // --- List of files --- //
         /** 
             Summary function which looking for files in choosen directory and return the string List. 
             Used to display file names on the page. 
@@ -102,18 +96,16 @@ namespace Optimage.Controllers
         {
             DirectoryInfo folder = new DirectoryInfo(Path.Combine(this.Environment.ContentRootPath, "Images"));
             FileInfo[] fileNames = folder.GetFiles("*.*");
-            List<string> imageNames = new List<string>();
-
+            ImagesModel images = new ImagesModel() { Names = new List<string>() };
+            
             foreach (var file in fileNames)
             {
-                imageNames.Add(file.Name);
+                images.Names.Add(file.Name);
             }
-
-            ImagesModel images = new ImagesModel() { Names = imageNames };
             return images;
         }
 
-        /* --- Download files --- */
+        // --- Download files --- //
         /** 
             Result is generated for every uploaded file as an action link.
             Return action for file download.
